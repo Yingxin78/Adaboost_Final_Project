@@ -1,0 +1,21 @@
+---
+title: "Adaboost Final Project"
+author: "Yingxin Zhang"
+date: "April 26, 2020"
+output: html_document
+---
+
+```{r rmarkdown-setup, warning= FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+
+library(tidyverse)
+library(tidymodels)
+library(knitr)
+library(grid)
+library(gridExtra)
+```
+
+```{r random seed, warning= FALSE, message = FALSE}
+set.seed(20200301)
+```
