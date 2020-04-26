@@ -17,5 +17,236 @@ library(gridExtra)
 ```
 
 ```{r random seed, warning= FALSE, message = FALSE}
-set.seed(20200301)
+set.seed(20200426)
+```
+
+```{r data loading, warning= FALSE, message = FALSE}
+# Load R Data File
+load("data/nhes_16_pfi_v1_0.rdata")
+
+# Create vector of selected variables
+# There are 329 variables in the original survey data. I choose 38 of them to include in my research.
+keepvars <- c(
+   "SCHRTSCHL",
+   "SPERFORM",
+   "SEREPEAT",
+   "SESUSOUT",
+   "SESUSPIN",
+   "SEEXPEL",
+   "SEFUTUREX",
+   "FOLIBRAYX",
+   "FOBOOKSTX",
+   "FOCONCRTX",
+   "FOMUSEUMX",
+   "FOZOOX",
+   "FOGROUPX",
+   "FOSPRTEVX",
+   "HDHEALTH",
+   "HDRECSER",
+   "CPLCBRTH",
+   "CHISPAN",
+   "CAMIND",
+   "CASIAN",
+   "CBLACK",
+   "CPACI",
+   "CWHITE",
+   "CHISPRM",
+   "CSEX",
+   "CENGLPRG",
+   "HHTOTALXX",
+   "HHMOM",
+   "HHDAD",
+   "HWELFTAN",
+   "HWELFST",
+   "HWIC",
+   "HFOODST",
+   "HMEDICAID",
+   "HCHIP",
+   "HSECN8",
+   "TTLHHINC",
+   "OWNRNTHB"
+)
+
+# Create new object containing only selected variables
+df <- nhes_16_pfi_v1_0[keepvars]
+```
+
+```{r display frequencies, warning= FALSE, message = FALSE}
+# Display frequencies for the categorical variables
+print("SCHRTSCHL:")
+table(df$SCHRTSCHL)
+
+print("SPERFORM:")
+table(df$SPERFORM)
+
+print("SEREPEAT:")
+table(df$SEREPEAT)
+
+print("SESUSOUT:")
+table(df$SESUSOUT)
+
+print("SESUSPIN:")
+table(df$SESUSPIN)
+
+print("SEEXPEL:")
+table(df$SEEXPEL)
+
+print("SEFUTUREX:")
+table(df$SEFUTUREX)
+
+print("FOLIBRAYX:")
+table(df$FOLIBRAYX)
+
+print("FOBOOKSTX:")
+table(df$FOBOOKSTX)
+
+print("FOCONCRTX:")
+table(df$FOCONCRTX)
+
+print("FOMUSEUMX:")
+table(df$FOMUSEUMX)
+
+print("FOZOOX:")
+table(df$FOZOOX)
+
+print("FOGROUPX:")
+table(df$FOGROUPX)
+
+print("FOSPRTEVX:")
+table(df$FOSPRTEVX)
+
+print("HDHEALTH:")
+table(df$HDHEALTH)
+
+print("HDRECSER:")
+table(df$HDRECSER)
+
+print("CPLCBRTH:")
+table(df$CPLCBRTH)
+
+print("CHISPAN:")
+table(df$CHISPAN)
+
+print("CAMIND:")
+table(df$CAMIND)
+
+print("CASIAN:")
+table(df$CASIAN)
+
+print("CBLACK:")
+table(df$CBLACK)
+
+print("CPACI:")
+table(df$CPACI)
+
+print("CWHITE:")
+table(df$CWHITE)
+
+print("CHISPRM:")
+table(df$CHISPRM)
+
+print("CSEX:")
+table(df$CSEX)
+
+print("CENGLPRG:")
+table(df$CENGLPRG)
+
+print("HHTOTALXX:")
+table(df$HHTOTALXX)
+
+print("HHMOM:")
+table(df$HHMOM)
+
+print("HHDAD:")
+table(df$HHDAD)
+
+print("HWELFTAN:")
+table(df$HWELFTAN)
+
+print("HWELFST:")
+table(df$HWELFST)
+
+print("HWIC:")
+table(df$HWIC)
+
+print("HFOODST:")
+table(df$HFOODST)
+
+print("HMEDICAID:")
+table(df$HMEDICAID)
+
+print("HCHIP:")
+table(df$HCHIP)
+
+print("HSECN8:")
+table(df$HSECN8)
+
+print("TTLHHINC:")
+table(df$TTLHHINC)
+
+print("OWNRNTHB:")
+table(df$OWNRNTHB)
+```
+
+```{r SCHRTSCHL, warning= FALSE, message = FALSE}
+# E4: I change all the "valid skip" reported to "no" for this variable, because based on the codebook for the original data, the "valid skip" reported here are the ones who study in private schools.
+df$SCHRTSCHL[df$SCHRTSCHL == "-1 Valid Skip"] <- "2 No"
+table(df$SCHRTSCHL)
+```
+
+```{r SEREPEAT, warning= FALSE, message = FALSE}
+# E8: I delete the 552 observations reported as "valid ship" for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
+df <- df[!(df$SEREPEAT == "-1 Valid Skip"),]
+table(df$SPERFORM)
+
+# The same 552 "valid skip" for every following variable are deleted.
+table(df$SEREPEAT)
+table(df$SESUSOUT)
+table(df$SESUSPIN)
+table(df$SEEXPEL)
+table(df$SEFUTUREX)
+```
+
+```{r SEDISP, warning= FALSE, message = FALSE}
+#E19: I create a new variable "SEDISP" based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
+df$SEDISP <- df$SESUSOUT
+df$SESUSOUT <- NULL
+df$SEDISP[(df$SESUSPIN == "1 Yes")] <- "1 Yes"
+df$SESUSPIN <- NULL
+df$SEDISP[(df$SEEXPEL == "1 Yes")] <- "1 Yes"
+df$SEEXPEL <- NULL
+table(df$SEDISP)
+```
+
+```{r SCHRTSCHL, warning= FALSE, message = FALSE}
+# E48: The original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more. 
+## I redefine this variable as whether this child has any learning disability. So, I change all the "yes" and "no" reported in the original question to "yes" and change all the "valid skip" to "no", because student without any disabilities or disorders do not need to answer this question.
+df$HDRECSER[df$HDRECSER == "2 No"] <- "1 Yes"
+df$HDRECSER[df$HDRECSER == "-1 Valid Skip"] <- "2 No"
+table(df$HDRECSER)
+```
+
+```{r SEREPEAT, warning= FALSE, message = FALSE}
+# E64: I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
+df$CENGLPRG[df$CENGLPRG == "-1 Valid Skip"] <- "2 No"
+table(df$CENGLPRG)
+```
+
+```{r HWELFALL, warning= FALSE, message = FALSE}
+# E112: I create a new variable "HWELFALL" based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
+df$HWELFALL <- df$HWELFTAN
+df$HWELFTAN <- NULL
+df$HWELFALL[(df$HWELFST == "1 Yes")] <- "1 Yes"
+df$HWELFST <- NULL
+df$HWELFALL[(df$HWIC == "1 Yes")] <- "1 Yes"
+df$HWIC <- NULL
+df$HWELFALL[(df$HFOODST == "1 Yes")] <- "1 Yes"
+df$HFOODST <- NULL
+df$HWELFALL[(df$HMEDICAID == "1 Yes")] <- "1 Yes"
+df$HMEDICAID <- NULL
+df$HWELFALL[(df$HCHIP == "1 Yes")] <- "1 Yes"
+df$HCHIP <- NULL
+df$HWELFALL[(df$HSECN8 == "1 Yes")] <- "1 Yes"
+df$HSECN8 <- NULL
+table(df$HWELFALL)
 ```
