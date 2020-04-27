@@ -5,12 +5,25 @@ date: "April 26, 2020"
 output: html_document
 ---
 
+## Adaboost
+
+Boosting is an approach to machine learning based on the idea of creating a highly accurate prediction rule by combining many relatively weak and inaccurate rules. The AdaBoost algorithm of Freund and Schapire was the first practical boosting algorithm, and remains one of the most widely used and studied, with applications in numerous fields.
+
+The main idea behind Adaboost is to combine multiple classifiers, called weak learners, in a unique classifier through a weighted linear combination. It iteratively extracts a weak classifier and assigns a weight to the classifier according to its relevance. Each weak learner minimizes an weighted sum error. At each iteration, a weight comes from previous error and is assigned to each sample.
+
+## Data
+
+Using the 2016 Parent and Family Involvement in Education Survey Data provided by the National Center for Education Statistics, I would like to use AdaBoost to predict whether a student is currently studying in a charter school or not. The data is pulled down from eDAT (https://nces.ed.gov/OnlineCodebook), under the NHES (National Household Education Survey).
+There has been a debate on whether school choice in the United States makes school segregation worse. Since charter school is one of the most popular of the school choice options, I would like to figure out the characteristics of students studying in charter schools and see whether there are any racial, socioeconomic, and other biases. The prediction will mainly base on 1) student's background: e.g. race, sex, birthplace, health condition, whether the student suffers from learning disabilities and disorders, whether the student has repeated any grade, suspended or expelled from school, etc.; 2) student's family background: e.g. total people in household, total household income, whether the family own/rent their house, whether the family receiving benefits from welfare plans, etc.
+
 ```{r rmarkdown-setup, warning= FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.align = "center")
 
 library(tidyverse)
 library(tidymodels)
+library(adabag)
+library(caret)
 library(knitr)
 library(grid)
 library(gridExtra)
@@ -19,6 +32,7 @@ library(gridExtra)
 ```{r random seed, warning= FALSE, message = FALSE}
 set.seed(20200426)
 ```
+
 
 ```{r data loading, warning= FALSE, message = FALSE}
 # Load R Data File
@@ -73,118 +87,80 @@ df <- nhes_16_pfi_v1_0[keepvars]
 
 ```{r display frequencies, warning= FALSE, message = FALSE}
 # Display frequencies for the categorical variables
-print("SCHRTSCHL:")
 table(df$SCHRTSCHL)
 
-print("SPERFORM:")
 table(df$SPERFORM)
 
-print("SEREPEAT:")
 table(df$SEREPEAT)
 
-print("SESUSOUT:")
 table(df$SESUSOUT)
 
-print("SESUSPIN:")
 table(df$SESUSPIN)
 
-print("SEEXPEL:")
 table(df$SEEXPEL)
 
-print("SEFUTUREX:")
 table(df$SEFUTUREX)
 
-print("FOLIBRAYX:")
 table(df$FOLIBRAYX)
 
-print("FOBOOKSTX:")
 table(df$FOBOOKSTX)
 
-print("FOCONCRTX:")
 table(df$FOCONCRTX)
 
-print("FOMUSEUMX:")
 table(df$FOMUSEUMX)
 
-print("FOZOOX:")
 table(df$FOZOOX)
 
-print("FOGROUPX:")
 table(df$FOGROUPX)
 
-print("FOSPRTEVX:")
 table(df$FOSPRTEVX)
 
-print("HDHEALTH:")
 table(df$HDHEALTH)
 
-print("HDRECSER:")
 table(df$HDRECSER)
 
-print("CPLCBRTH:")
 table(df$CPLCBRTH)
 
-print("CHISPAN:")
 table(df$CHISPAN)
 
-print("CAMIND:")
 table(df$CAMIND)
 
-print("CASIAN:")
 table(df$CASIAN)
 
-print("CBLACK:")
 table(df$CBLACK)
 
-print("CPACI:")
 table(df$CPACI)
 
-print("CWHITE:")
 table(df$CWHITE)
 
-print("CHISPRM:")
 table(df$CHISPRM)
 
-print("CSEX:")
 table(df$CSEX)
 
-print("CENGLPRG:")
 table(df$CENGLPRG)
 
-print("HHTOTALXX:")
 table(df$HHTOTALXX)
 
-print("HHMOM:")
 table(df$HHMOM)
 
-print("HHDAD:")
 table(df$HHDAD)
 
-print("HWELFTAN:")
 table(df$HWELFTAN)
 
-print("HWELFST:")
 table(df$HWELFST)
 
-print("HWIC:")
 table(df$HWIC)
 
-print("HFOODST:")
 table(df$HFOODST)
 
-print("HMEDICAID:")
 table(df$HMEDICAID)
 
-print("HCHIP:")
 table(df$HCHIP)
 
-print("HSECN8:")
 table(df$HSECN8)
 
-print("TTLHHINC:")
 table(df$TTLHHINC)
 
-print("OWNRNTHB:")
 table(df$OWNRNTHB)
 ```
 
@@ -218,7 +194,7 @@ df$SEEXPEL <- NULL
 table(df$SEDISP)
 ```
 
-```{r SCHRTSCHL, warning= FALSE, message = FALSE}
+```{r HDRECSER, warning= FALSE, message = FALSE}
 # E48: The original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more. 
 ## I redefine this variable as whether this child has any learning disability. So, I change all the "yes" and "no" reported in the original question to "yes" and change all the "valid skip" to "no", because student without any disabilities or disorders do not need to answer this question.
 df$HDRECSER[df$HDRECSER == "2 No"] <- "1 Yes"
@@ -226,7 +202,7 @@ df$HDRECSER[df$HDRECSER == "-1 Valid Skip"] <- "2 No"
 table(df$HDRECSER)
 ```
 
-```{r SEREPEAT, warning= FALSE, message = FALSE}
+```{r CENGLPRG, warning= FALSE, message = FALSE}
 # E64: I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
 df$CENGLPRG[df$CENGLPRG == "-1 Valid Skip"] <- "2 No"
 table(df$CENGLPRG)
@@ -249,4 +225,32 @@ df$HCHIP <- NULL
 df$HWELFALL[(df$HSECN8 == "1 Yes")] <- "1 Yes"
 df$HSECN8 <- NULL
 table(df$HWELFALL)
+```
+```{r drop levles, warning= FALSE, message = FALSE}
+df <- droplevels(df)
+```
+
+```{r train test split, warning= FALSE, message = FALSE}
+# create a split object
+split <- initial_split(df, prop = 0.8)
+# use the split object to create training and testing data
+charter_training <- training(split)
+charter_testing <- testing(split)
+```
+
+```{r train adaboost, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost = boosting(SCHRTSCHL~., data=charter_training, boos=TRUE, mfinal=50, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+summary(adaboost)
+```
+
+```{r test adaboost, warning= FALSE, message = FALSE}
+# prediction
+pred = predict(adaboost, charter_testing)
+# metric
+print(pred$confusion)
+```
+
+```{r feature importance, warning= FALSE, message = FALSE}
+adaboost$importance
 ```
