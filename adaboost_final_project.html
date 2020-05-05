@@ -204,7 +204,11 @@ library(knitr)
 library(grid)
 library(gridExtra)</code></pre>
 <pre class="r"><code>set.seed(20200426)</code></pre>
-<pre class="r"><code># Load R Data File
+</div>
+<div id="data-loading" class="section level1">
+<h1>Data Loading</h1>
+<p>Load data and select varibles</p>
+<pre class="r"><code># load R Data File
 load(&quot;data/nhes_16_pfi_v1_0.rdata&quot;)
 
 # Create vector of selected variables
@@ -252,213 +256,23 @@ keepvars &lt;- c(
 
 # Create new object containing only selected variables
 df &lt;- nhes_16_pfi_v1_0[keepvars]</code></pre>
-<pre class="r"><code># Display frequencies for the categorical variables
-table(df$SCHRTSCHL)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0          2084           843         11148</code></pre>
-<pre class="r"><code>table(df$SPERFORM)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0          9940          3289           846</code></pre>
-<pre class="r"><code>table(df$SEREPEAT)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0           552          1045         12478</code></pre>
-<pre class="r"><code>table(df$SESUSOUT)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0           552           894         12629</code></pre>
-<pre class="r"><code>table(df$SESUSPIN)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0           552           933         12590</code></pre>
-<pre class="r"><code>table(df$SEEXPEL)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0           552           179         13344</code></pre>
-<pre class="r"><code>table(df$SEFUTUREX)</code></pre>
-<pre><code>## 
-##                                                          -9 Missing 
-##                                                                   0 
-##                                                       -1 Valid Skip 
-##                                                                 552 
-##                          1 Complete less than a high school diploma 
-##                                                                 101 
-##                                         2 Graduate from high school 
-##                                                                 841 
-##         3 Attend a vocational or technical school after high school 
-##                                                                 842 
-##                               4 Attend two or more years of college 
-##                                                                1783 
-##                                          5 Earn a Bachelor’s degree 
-##                                                                4135 
-## 6 Earn a graduate degree or professional degree beyond a Bachelor’s 
-##                                                                5821</code></pre>
-<pre class="r"><code>table(df$FOLIBRAYX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          4760          9315</code></pre>
-<pre class="r"><code>table(df$FOBOOKSTX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          5106          8969</code></pre>
-<pre class="r"><code>table(df$FOCONCRTX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          5051          9024</code></pre>
-<pre class="r"><code>table(df$FOMUSEUMX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          3704         10371</code></pre>
-<pre class="r"><code>table(df$FOZOOX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          2891         11184</code></pre>
-<pre class="r"><code>table(df$FOGROUPX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          7530          6545</code></pre>
-<pre class="r"><code>table(df$FOSPRTEVX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          5732          8343</code></pre>
-<pre class="r"><code>table(df$HDHEALTH)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip   1 Excellent   2 Very good        3 Good 
-##             0             0          8078          4335          1338 
-##        4 Fair        5 Poor 
-##           275            49</code></pre>
-<pre class="r"><code>table(df$HDRECSER)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0         10595          2646           834</code></pre>
-<pre class="r"><code>table(df$CPLCBRTH)</code></pre>
-<pre><code>## 
-##                                                -9 Missing 
-##                                                         0 
-##                                             -1 Valid Skip 
-##                                                         0 
-## 1 One of the 50 United States or the District of Columbia 
-##                                                     13255 
-##                             2 One of the U.S. territories 
-##                                                        86 
-##                                         3 Another country 
-##                                                       734</code></pre>
-<pre class="r"><code>table(df$CHISPAN)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          2956         11119</code></pre>
-<pre class="r"><code>table(df$CAMIND)</code></pre>
-<pre><code>## 
-##      -9 Missing   -1 Valid Skip    1 Yes/Marked 2 No/Not marked 
-##               0               0             408           13667</code></pre>
-<pre class="r"><code>table(df$CASIAN)</code></pre>
-<pre><code>## 
-##      -9 Missing   -1 Valid Skip    1 Yes/Marked 2 No/Not marked 
-##               0               0            1240           12835</code></pre>
-<pre class="r"><code>table(df$CBLACK)</code></pre>
-<pre><code>## 
-##      -9 Missing   -1 Valid Skip    1 Yes/Marked 2 No/Not marked 
-##               0               0            1897           12178</code></pre>
-<pre class="r"><code>table(df$CPACI)</code></pre>
-<pre><code>## 
-##      -9 Missing   -1 Valid Skip    1 Yes/Marked 2 No/Not marked 
-##               0               0             153           13922</code></pre>
-<pre class="r"><code>table(df$CWHITE)</code></pre>
-<pre><code>## 
-##      -9 Missing   -1 Valid Skip    1 Yes/Marked 2 No/Not marked 
-##               0               0           10750            3325</code></pre>
-<pre class="r"><code>table(df$CHISPRM)</code></pre>
-<pre><code>## 
-##                   -9 Missing                -1 Valid Skip 
-##                            0                            0 
-##     1 Hispanic, race missing 2 Not Hispanic/Race reported 
-##                          667                        13408</code></pre>
-<pre class="r"><code>table(df$CSEX)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip        1 Male      2 Female 
-##             0             0          7218          6857</code></pre>
-<pre class="r"><code>table(df$CENGLPRG)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0         12287           484          1304</code></pre>
-<pre class="r"><code>table(df$HHTOTALXX)</code></pre>
-<pre><code>## 
-## -1 Valid Skip            10             2             3             4 
-##             0            53          1098          3509          5422 
-##             5             6             7             8             9 
-##          2561           914           360           115            43</code></pre>
-<pre class="r"><code>table(df$HHMOM)</code></pre>
-<pre><code>## 
-## -1 Valid Skip             0             1             2             4 
-##             0          1700         12334            37             2 
-##             6             7 
-##             1             1</code></pre>
-<pre class="r"><code>table(df$HHDAD)</code></pre>
-<pre><code>## 
-## -1 Valid Skip             0             1             2             4 
-##             0          3640         10417            17             1</code></pre>
-<pre class="r"><code>table(df$HWELFTAN)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0           429         13646</code></pre>
-<pre class="r"><code>table(df$HWELFST)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0           608         13467</code></pre>
-<pre class="r"><code>table(df$HWIC)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0           593         13482</code></pre>
-<pre class="r"><code>table(df$HFOODST)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          1991         12084</code></pre>
-<pre class="r"><code>table(df$HMEDICAID)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          2856         11219</code></pre>
-<pre class="r"><code>table(df$HCHIP)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0          1249         12826</code></pre>
-<pre class="r"><code>table(df$HSECN8)</code></pre>
-<pre><code>## 
-##    -9 Missing -1 Valid Skip         1 Yes          2 No 
-##             0             0           452         13623</code></pre>
-<pre class="r"><code>table(df$TTLHHINC)</code></pre>
-<pre><code>## 
-##             -9 Missing          -1 Valid Skip        1 $0 to $10,000 
-##                      0                      0                    700 
-##   2 $10,001 to $20,000   3 $20,001 to $30,000   4 $30,001 to $40,000 
-##                    951                   1160                   1154 
-##   5 $40,001 to $50,000   6 $50,001 to $60,000   7 $60,001 to $75,000 
-##                    998                    978                   1256 
-##  8 $75,001 to $100,000 9 $100,001 to $150,000    10 $150,001 or more 
-##                   2082                   2331                   2465</code></pre>
-<pre class="r"><code>table(df$OWNRNTHB)</code></pre>
-<pre><code>## 
-##                           -9 Missing                        -1 Valid Skip 
-##                                    0                                    0 
-##              1 Owned or being bought                             2 Rented 
-##                                10592                                 3203 
-## 3 Occupied by some other arrangement 
-##                                  280</code></pre>
-<pre class="r"><code># E4: I change all the &quot;valid skip&quot; reported to &quot;no&quot; for this variable, because based on the codebook for the original data, the &quot;valid skip&quot; reported here are the ones who study in private schools.
-df$SCHRTSCHL[df$SCHRTSCHL == &quot;-1 Valid Skip&quot;] &lt;- &quot;2 No&quot;
+</div>
+<div id="data-processing" class="section level1">
+<h1>Data Processing</h1>
+<p>E4: I change all the “valid skip” reported to “no” for this variable, because based on the codebook for the original data, the “valid skip” reported here are the ones who study in private schools.</p>
+<pre class="r"><code>df$SCHRTSCHL[df$SCHRTSCHL == &quot;-1 Valid Skip&quot;] &lt;- &quot;2 No&quot;
 table(df$SCHRTSCHL)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0           843         13232</code></pre>
-<pre class="r"><code># E8: I delete the 552 observations reported as &quot;valid ship&quot; for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
-df &lt;- df[!(df$SEREPEAT == &quot;-1 Valid Skip&quot;),]
+<p>E8: I delete the 552 observations reported as “valid ship” for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.</p>
+<pre class="r"><code>df &lt;- df[!(df$SEREPEAT == &quot;-1 Valid Skip&quot;),]
 table(df$SPERFORM)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0          9388          3289           846</code></pre>
-<pre class="r"><code># The same 552 &quot;valid skip&quot; for every following variable are deleted.
-table(df$SEREPEAT)</code></pre>
+<p>The same 552 “valid skip” for every following variable are deleted.</p>
+<pre class="r"><code>table(df$SEREPEAT)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0          1045         12478</code></pre>
@@ -492,8 +306,8 @@ table(df$SEREPEAT)</code></pre>
 ##                                                                4135 
 ## 6 Earn a graduate degree or professional degree beyond a Bachelor’s 
 ##                                                                5821</code></pre>
-<pre class="r"><code>#E19: I create a new variable &quot;SEDISP&quot; based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
-df$SEDISP &lt;- df$SESUSOUT
+<p>E19: I create a new variable “SEDISP” based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.</p>
+<pre class="r"><code>df$SEDISP &lt;- df$SESUSOUT
 df$SESUSOUT &lt;- NULL
 df$SEDISP[(df$SESUSPIN == &quot;1 Yes&quot;)] &lt;- &quot;1 Yes&quot;
 df$SESUSPIN &lt;- NULL
@@ -503,22 +317,22 @@ table(df$SEDISP)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0          1365         12158</code></pre>
-<pre class="r"><code># E48: The original survey question for this variable is &quot;whether this child receiving services for his/her condition&quot;. The codebook tells me that the &quot;condition&quot; refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more. 
-## I redefine this variable as whether this child has any learning disability. So, I change all the &quot;yes&quot; and &quot;no&quot; reported in the original question to &quot;yes&quot; and change all the &quot;valid skip&quot; to &quot;no&quot;, because student without any disabilities or disorders do not need to answer this question.
-df$HDRECSER[df$HDRECSER == &quot;2 No&quot;] &lt;- &quot;1 Yes&quot;
+<p>E48: The original survey question for this variable is “whether this child receiving services for his/her condition”. The codebook tells me that the “condition” refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more.</p>
+<p>I redefine this variable as whether this child has any learning disability. So, I change all the “yes” and “no” reported in the original question to “yes” and change all the “valid skip” to “no”, because student without any disabilities or disorders do not need to answer this question.</p>
+<pre class="r"><code>df$HDRECSER[df$HDRECSER == &quot;2 No&quot;] &lt;- &quot;1 Yes&quot;
 df$HDRECSER[df$HDRECSER == &quot;-1 Valid Skip&quot;] &lt;- &quot;2 No&quot;
 table(df$HDRECSER)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0          3304         10219</code></pre>
-<pre class="r"><code># E64: I change all the &quot;valid skip&quot; reported to &quot;no&quot; for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
-df$CENGLPRG[df$CENGLPRG == &quot;-1 Valid Skip&quot;] &lt;- &quot;2 No&quot;
+<p>E64: I change all the “valid skip” reported to “no” for this variable, because native English speakers and children who are not able to speak do not need to answer this question.</p>
+<pre class="r"><code>df$CENGLPRG[df$CENGLPRG == &quot;-1 Valid Skip&quot;] &lt;- &quot;2 No&quot;
 table(df$CENGLPRG)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0           450         13073</code></pre>
-<pre class="r"><code># E112: I create a new variable &quot;HWELFALL&quot; based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
-df$HWELFALL &lt;- df$HWELFTAN
+<p>E112: I create a new variable “HWELFALL” based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.</p>
+<pre class="r"><code>df$HWELFALL &lt;- df$HWELFTAN
 df$HWELFTAN &lt;- NULL
 df$HWELFALL[(df$HWELFST == &quot;1 Yes&quot;)] &lt;- &quot;1 Yes&quot;
 df$HWELFST &lt;- NULL
@@ -537,6 +351,16 @@ table(df$HWELFALL)</code></pre>
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0          3683          9840</code></pre>
 <pre class="r"><code>df &lt;- droplevels(df)</code></pre>
+</div>
+<div id="training" class="section level1">
+<h1>Training</h1>
+<p>The data is highly unbalanced</p>
+<pre class="r"><code># Display frequencies for the categorical variables
+table(df$SCHRTSCHL)</code></pre>
+<pre><code>## 
+## 1 Yes  2 No 
+##   843 12680</code></pre>
+<p>Split data set</p>
 <pre class="r"><code># create a split object
 split &lt;- initial_split(df, prop = 0.8)
 # use the split object to create training and testing data

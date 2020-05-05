@@ -34,8 +34,14 @@ set.seed(20200426)
 ```
 
 
+
+# Data Loading
+
+
+Load data and select varibles
+
 ```{r data loading, warning= FALSE, message = FALSE}
-# Load R Data File
+# load R Data File
 load("data/nhes_16_pfi_v1_0.rdata")
 
 # Create vector of selected variables
@@ -85,97 +91,29 @@ keepvars <- c(
 df <- nhes_16_pfi_v1_0[keepvars]
 ```
 
-```{r display frequencies, warning= FALSE, message = FALSE}
-# Display frequencies for the categorical variables
-table(df$SCHRTSCHL)
 
-table(df$SPERFORM)
 
-table(df$SEREPEAT)
+# Data Processing
 
-table(df$SESUSOUT)
-
-table(df$SESUSPIN)
-
-table(df$SEEXPEL)
-
-table(df$SEFUTUREX)
-
-table(df$FOLIBRAYX)
-
-table(df$FOBOOKSTX)
-
-table(df$FOCONCRTX)
-
-table(df$FOMUSEUMX)
-
-table(df$FOZOOX)
-
-table(df$FOGROUPX)
-
-table(df$FOSPRTEVX)
-
-table(df$HDHEALTH)
-
-table(df$HDRECSER)
-
-table(df$CPLCBRTH)
-
-table(df$CHISPAN)
-
-table(df$CAMIND)
-
-table(df$CASIAN)
-
-table(df$CBLACK)
-
-table(df$CPACI)
-
-table(df$CWHITE)
-
-table(df$CHISPRM)
-
-table(df$CSEX)
-
-table(df$CENGLPRG)
-
-table(df$HHTOTALXX)
-
-table(df$HHMOM)
-
-table(df$HHDAD)
-
-table(df$HWELFTAN)
-
-table(df$HWELFST)
-
-table(df$HWIC)
-
-table(df$HFOODST)
-
-table(df$HMEDICAID)
-
-table(df$HCHIP)
-
-table(df$HSECN8)
-
-table(df$TTLHHINC)
-
-table(df$OWNRNTHB)
-```
+E4: I change all the "valid skip" reported to "no" for this variable, because based on the codebook for the original data, the "valid skip" reported here are the ones who study in private schools.
 
 ```{r SCHRTSCHL, warning= FALSE, message = FALSE}
-# E4: I change all the "valid skip" reported to "no" for this variable, because based on the codebook for the original data, the "valid skip" reported here are the ones who study in private schools.
 df$SCHRTSCHL[df$SCHRTSCHL == "-1 Valid Skip"] <- "2 No"
 table(df$SCHRTSCHL)
 ```
 
+
+E8: I delete the 552 observations reported as "valid ship" for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
+
 ```{r SEREPEAT, warning= FALSE, message = FALSE}
-# E8: I delete the 552 observations reported as "valid ship" for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
 df <- df[!(df$SEREPEAT == "-1 Valid Skip"),]
 table(df$SPERFORM)
+```
 
-# The same 552 "valid skip" for every following variable are deleted.
+
+The same 552 "valid skip" for every following variable are deleted.
+
+```{r other varibles, warning= FALSE, message = FALSE}
 table(df$SEREPEAT)
 table(df$SESUSOUT)
 table(df$SESUSPIN)
@@ -183,8 +121,10 @@ table(df$SEEXPEL)
 table(df$SEFUTUREX)
 ```
 
+
+E19: I create a new variable "SEDISP" based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
+
 ```{r SEDISP, warning= FALSE, message = FALSE}
-#E19: I create a new variable "SEDISP" based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
 df$SEDISP <- df$SESUSOUT
 df$SESUSOUT <- NULL
 df$SEDISP[(df$SESUSPIN == "1 Yes")] <- "1 Yes"
@@ -194,22 +134,29 @@ df$SEEXPEL <- NULL
 table(df$SEDISP)
 ```
 
+
+E48: The original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more.
+
+I redefine this variable as whether this child has any learning disability. So, I change all the "yes" and "no" reported in the original question to "yes" and change all the "valid skip" to "no", because student without any disabilities or disorders do not need to answer this question.
+
 ```{r HDRECSER, warning= FALSE, message = FALSE}
-# E48: The original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more. 
-## I redefine this variable as whether this child has any learning disability. So, I change all the "yes" and "no" reported in the original question to "yes" and change all the "valid skip" to "no", because student without any disabilities or disorders do not need to answer this question.
 df$HDRECSER[df$HDRECSER == "2 No"] <- "1 Yes"
 df$HDRECSER[df$HDRECSER == "-1 Valid Skip"] <- "2 No"
 table(df$HDRECSER)
 ```
 
+
+E64: I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
+
 ```{r CENGLPRG, warning= FALSE, message = FALSE}
-# E64: I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
 df$CENGLPRG[df$CENGLPRG == "-1 Valid Skip"] <- "2 No"
 table(df$CENGLPRG)
 ```
 
+
+E112: I create a new variable "HWELFALL" based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
+
 ```{r HWELFALL, warning= FALSE, message = FALSE}
-# E112: I create a new variable "HWELFALL" based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
 df$HWELFALL <- df$HWELFTAN
 df$HWELFTAN <- NULL
 df$HWELFALL[(df$HWELFST == "1 Yes")] <- "1 Yes"
@@ -229,6 +176,20 @@ table(df$HWELFALL)
 ```{r drop levles, warning= FALSE, message = FALSE}
 df <- droplevels(df)
 ```
+
+
+
+# Training
+
+The data is highly unbalanced
+
+```{r display frequencies, warning= FALSE, message = FALSE}
+# Display frequencies for the categorical variables
+table(df$SCHRTSCHL)
+```
+
+
+Split data set
 
 ```{r train test split, warning= FALSE, message = FALSE}
 # create a split object
