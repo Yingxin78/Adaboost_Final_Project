@@ -22,6 +22,7 @@ knitr::opts_chunk$set(fig.align = "center")
 
 library(tidyverse)
 library(tidymodels)
+library(ROSE)
 library(adabag)
 library(caret)
 library(knitr)
@@ -181,14 +182,6 @@ df <- droplevels(df)
 
 # Training
 
-The data is highly unbalanced
-
-```{r display frequencies, warning= FALSE, message = FALSE}
-# Display frequencies for the categorical variables
-table(df$SCHRTSCHL)
-```
-
-
 Split data set
 
 ```{r train test split, warning= FALSE, message = FALSE}
@@ -198,6 +191,22 @@ split <- initial_split(df, prop = 0.8)
 charter_training <- training(split)
 charter_testing <- testing(split)
 ```
+
+
+The data is highly unbalanced which contains only 6% of positive cases
+
+```{r display frequencies, warning= FALSE, message = FALSE}
+prop.table(table(df$SCHRTSCHL))
+```
+
+
+balance the data by oversampling
+
+```{r displa, warning= FALSE, message = FALSE}
+charter_training_balance <- ovun.sample(SCHRTSCHL~., data = charter_training, method = "both", p = 0.5， seed = 20200505)$data
+table(charter_training_balance$SCHRTSCHL)
+```
+
 
 ```{r train adaboost, warning= FALSE, message = FALSE}
 # classification with adaboost
