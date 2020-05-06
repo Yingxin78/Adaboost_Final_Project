@@ -5,14 +5,46 @@ date: "April 26, 2020"
 output: html_document
 ---
 
-## Adaboost
+## Introduction of Adaboost
+"Boosting" is an approach to machine learning based on the idea of creating a powerful ensemble of classifiers by successively refitting a weak classifier to different weighted realizations of a data set [[1]](https://www.cs.princeton.edu/~schapire/papers/explaining-adaboost.pdf). To be specific, the boosting process is done by building a model from the training data and add a second model to correct the error from the prior model until it can perfectly predict the training set or add the largest number of models.
+  
+The AdaBoost (adaptive boosting) algorithm was proposed by Yoav Freund and Robert Shapire in 1996 for constructing strong model sequentially with multiple weak models [[2]](https://cseweb.ucsd.edu/~yfreund/papers/boostingexperiments.pdf). As the first practical boosting algorithm, it was crowned as the “best off-the-shelf classifier in the world" shortly after its introduction in a 1996 NIPS conference [[3]](https://projecteuclid.org/download/pdf_1/euclid.aos/1016218223). Freund and Schapire illustrated an interesting example, horse-racing gambler, in their later study to explain the idea about optimization and solution space search behind [[4]](https://www.sciencedirect.com/science/article/pii/S002200009791504X). Naturally, the gambler would turn to some highly successful experts in gambling for their advice before he made decisions on which horse he should bet. Each expert would give him some good suggestions based on his own experience. In terms of pattern classification, these suggestions formed a large pool of classifiers, although they were obviously very rough and inaccurate. The point was that could the individuals’ experience be integrated to build up a better classifier for the gambler’s betting? This problem attracted lots of researchers’ attention to seek valuable strategies to deal with.
 
-Boosting is an approach to machine learning based on the idea of creating a highly accurate prediction rule by combining many relatively weak and inaccurate rules. The AdaBoost algorithm of Freund and Schapire was the first practical boosting algorithm, and remains one of the most widely used and studied, with applications in numerous fields.
+In fact, Kearns and Valiant [[5]](https://www.cis.upenn.edu/~mkearns/papers/crypto.pdf) were the first to pose the question of whether some weak learning algorithms which runs just a little better than random guessing in the PAC model can be “boosted” into an accurate strong learning algorithm. If we regard each expert’s suggestion as a training sample for classifier learning, If we regard each expert’s suggestion as a training sample for classifier learning, for a given input pattern $x_i$, each expert classifier $k_j$ can express his opinion, denoted by $k_j$($x_i$). Assuming the problem of separating the set of training vectors belonging to two classes, $k_j$($x_i$) takes two values only, +1 or -1 respectively, i.e. $k_j(x_i) \in$ {-1,+1}. The final decision of the committee K of experts is made by sign $C(x_i)$, the sign of the linear combination of the weighted sum of expert opinions, where $C(x_i) = \alpha_1k_1(x_i) + \alpha_2k_2(x_i) + \dots + \alpha_lk_l(x_i)$, and $k_1, k_2, \dots, k_l$ denote the l experts.$\alpha_1, \alpha_2, \dots, \alpha_l$  are the weights the gambler assign to the opinion of each expert in the committee [[6]](https://www.cmi.ac.in/~madhavan/courses/dmml2019jan/literature/rojas-adaboost.pdf). This idea of combining weak classifier to form a expective strong decision function contributed the emeging of AdaBoost boosting algorithm.
 
-The main idea behind Adaboost is to combine multiple classifiers, called weak learners, in a unique classifier through a weighted linear combination. It iteratively extracts a weak classifier and assigns a weight to the classifier according to its relevance. Each weak learner minimizes an weighted sum error. At each iteration, a weight comes from previous error and is assigned to each sample.
+## Adaboost Algorithm
+AdaBoost algorithm creates a set of poor learners by maintaining a collection of weights over training data and adjusts them after each weak learning cycle adaptively. The weights of the training samples which are misclassified by current weak learner will be increased while the weights of the samples which are correctly classified will be decreased [[7]](http://users.cecs.anu.edu.au/~wanglei/My_papers/AdaBoost_SVM_IJCNN_2005.pdf). The  AdaBoost algorithm is described in the Figure below [[1]](https://www.cs.princeton.edu/~schapire/papers/explaining-adaboost.pdf):
 
-## Data
+```{r warning= FALSE, message = FALSE}
+knitr::include_graphics("./images/AdaBoost.png")
+```
 
+One of the main ideas of AdaBoost algorithm is to maintain a distribution or set of weights over the training set.The weight of this distribution on training example $i$ on round $t$ is denoted $D_t(i)$. Initially, all weights are initialized equally, but on each round, the weights of incorrectly classified examples are increased so that the weak learner is forced to focus on the hard examples in the trading set. The weak learner’s job is to find a weak hypothesis $h_t: \chi\to$ {-1,+1} appropriate for the distribution $D_t$ [[8]](https://cseweb.ucsd.edu/~yfreund/papers/IntroToBoosting.pdf). AdaBoost is one of the most promising, fast convergence, and easy to be implemented machine learning algorithm. It requires no prior knowledge about the weak learner and can be easily combined with other method to find weak hypothesis. 
+
+## Competing Explanations for the Effectiveness of AdaBoost
+The success of AdaBoost was followed by efforts to explain and recast it in more conventional statistical terms. I will provide an overview of some of the most popular explanations for the success of boosting (i.e. the margins view of boosting and the statistical view of boosting), with analysis of both the strengths and weaknesses of each approach in the following paragraphs.
+
+### 1. Margin View of Boosting 
+Some of the earliest attempts to understand AdaBoost’s performance based on the VC theory [[9]](https://courses.engr.illinois.edu/ece544na/fa2014/vapnik71.pdf) predicted that its generalization error would increase with the number of iterations [[10]](https://ebookcentral-proquest-com.proxy.library.georgetown.edu/lib/georgetown/detail.action?docID=3339451). In other words, as AdaBoost is run for more rounds, it is able to fit the data increasingly well which should lead to overfitting. However, studies have demonstrated that running boosting for many rounds does not overfit in most cases. One of the first attempts to resolve this paradox was explored by Schapire et al. [[11]](https://www.cc.gatech.edu/~isbell/tutorials/boostingmargins.pdf), who focused on the margins of AdaBoost. The margins can be thought of as a measure of how confident are the predictions made by the algorithm. According to this explanation, although the training error—that is, whether or not the predictions are correct—is not changing after round 5, the confidence in those predictions is increasing dramatically with additional rounds of boosting. And it is this increase in confidence which accounts for the better generalization performance. The emprical results demonstrate that AdaBoost generally tends to increase the margins of all training examples, and moreover, the higher the accuracy of the weak hypotheses, the larger will be the margins. So, one would hypothetically desire to produce a classifier with margins as large as possible. All this suggests that perhaps a more effective learning algorithm could be designed by explicitly attempting to maximize the margins [[12]](https://dspace.mit.edu/handle/1721.1/85665?show=full). <br>
+
+The "arc-gv" attempted by Breiman [[13]](http://cognet.mit.edu/journal/10.1162/089976699300016106) was created for maximizing the smallest margin of any training example. Although this algorithm did indeed produce larger margins, its test performance turned out to be slightly worse than that of AdaBoost, apparently contradicting the margins theory. Other algorithms designed to maximize margins, such as "LP-Boost" have also been found to perform worse than AdaBoost in practice [[14]](http://www.jmlr.org/papers/volume12/wang11a/wang11a.pdf). Reyzin and Schapire [[15]](https://collaborate.princeton.edu/en/publications/how-boosting-the-margin-can-also-boost-classifier-complexity) suggested two possible explanations to the unexpected results of "arc-gv". First, more aggressive margin maximization seems to produce more complex weak hypotheses, which tends to raise the potential for overfitting, confounding the experiments. And second, in some cases, arc-gv produces a higher minimum margin, but a distribution of margins that is lower overall. 
+
+In summary, according to the margins explanation, AdaBoost will succeed without overfitting if the weak-hypothesis accuracies are substantially better than random (since this will lead to large margins), and if provided with enough data relative to the complexity of the weak hypotheses. This is the only known theory that explains the cases in which overfitting is not observed. On the other hand, attempted extensions of AdaBoost based on direct maximization of margins have not been entirely successful, while work in this area is still ongoing.
+
+### 2. Statistical Optimization View of Boosting
+The study of Friedman et al. [[3]](https://projecteuclid.org/download/pdf_1/euclid.aos/1016218223) has recasted boosting as a statistically familiar program. The authors places boosting firmly in classical statistical territory by clearly defining it as a procedure to search through the space of convex combinations of weak learners or base classifiers. This explanation has been widely assimilated and has reiterated in a plethora of statistical literature reviews.Research on the optimization properties of AdaBoost and the exponential loss function is still an active area of research. The exponential loss can be shown that the choices of classifier and its weight on each round happen to be the same as would be chosen so as to cause the greatest decrease in this loss. Breiman [[13]](http://cognet.mit.edu/journal/10.1162/089976699300016106) is the first researcher who found this connection. As a procedure for minimizing this loss, AdaBoost can be viewed as a form of coordinate descent (in which each step is made greedily along one of the coordinate directions), as noted by Breiman. From this perspective, it might seem tempting to conclude that AdaBoost’s effectiveness as a learning algorithm is derived from the choice of loss function that it apparently aims to minimize, in other words, that AdaBoost works only because it minimizes exponential loss. 
+
+Although the statistical optimization perspective of AdaBoost is surely interesting and informative, there remain problems. For example, the fact that AdaBoost minimizes an exponential loss may not alone account for its performance as a classifier. Freund et al. [[12]](https://dspace.mit.edu/handle/1721.1/85665?show=full) provide evidence to this end. They conduct an experiment that compares AdaBoost to two AdaBoost variants that minimize the exponential loss function at differing rates: one performs the minimiza- tion very quickly through gradient descent, while the other performs the minimization quite slowly. They find that AdaBoost performed significantly better than these two competitors, suggesting that AdaBoost’s strong performance cannot be tied exclusively to its action on the exponential loss function. 
+
+So to summarize, minimization of exponential loss is a fundamental property of AdaBoost, and one that opens the door for a range of practical generalizations of the algorithm. However, it is important to keep in mind that this perspective is rather limited in terms of what it can tell us about AdaBoost’s accuracy as a learning algorithm. 
+
+## The Strengths and Weaknesses of AdaBoost
+To sum up, AdaBoost is a powerful classification algorithm that has enjoyed practical success with applications in a wide variety of social policy issues, such as prediction of students' performance regarding to specific educational policy or making policy decisions based on the classification of whether people engaged in specific social care or health care plans. One of the many advantages of the AdaBoost Algorithm is it is fast, simple and easy to program.The user only need to care about two main problems: (1) which weak classifier might work best to solve their given classification problem; (2) the number of boosting rounds that should be used during the training phase. Also, it has the flexibility to be combined with any machine learning algorithm and there is no need to tune the parameters. It has been extended to learning problems beyond binary classification and it is versatile as it can be used with text or numeric data. It can be less susceptible to the overfitting problem than most learning algorithms.
+
+AdaBoost also has few disadvantages. AdaBoost’s performance can be very poor when the weak classifiers are insufficiently expressive. Noise can be real problem for AdaBoost, and various approaches have been proposed for handling it, including a form of boosting which operates in continuous time. Also, if weak classifiers being too weak, it can lead to low margins and overfitting.
+
+
+## Data Introduction
 Using the 2016 Parent and Family Involvement in Education Survey Data provided by the National Center for Education Statistics, I would like to use AdaBoost to predict whether a student is currently studying in a charter school or not. The data is pulled down from eDAT (https://nces.ed.gov/OnlineCodebook), under the NHES (National Household Education Survey).
 There has been a debate on whether school choice in the United States makes school segregation worse. Since charter school is one of the most popular of the school choice options, I would like to figure out the characteristics of students studying in charter schools and see whether there are any racial, socioeconomic, and other biases. The prediction will mainly base on 1) student's background: e.g. race, sex, birthplace, health condition, whether the student suffers from learning disabilities and disorders, whether the student has repeated any grade, suspended or expelled from school, etc.; 2) student's family background: e.g. total people in household, total household income, whether the family own/rent their house, whether the family receiving benefits from welfare plans, etc.
 
@@ -36,17 +68,14 @@ set.seed(20200426)
 
 
 
-# Data Loading
-
-
-Load data and select varibles
+## Data Loading
+There are 329 variables in the original survey data. I choose 38 of them to include in my research. The original survey questions for each variables are listed in the appendix.
 
 ```{r data loading, warning= FALSE, message = FALSE}
 # load R Data File
 load("data/nhes_16_pfi_v1_0.rdata")
 
 # Create vector of selected variables
-# There are 329 variables in the original survey data. I choose 38 of them to include in my research.
 keepvars <- c(
    "SCHRTSCHL",
    "SPERFORM",
@@ -92,11 +121,10 @@ keepvars <- c(
 df <- nhes_16_pfi_v1_0[keepvars]
 ```
 
+## Data Cleaning
+For all the variables seleceted, I recode them for better analysis.
 
-
-# Data Processing
-
-E4: I change all the "valid skip" reported to "no" for this variable, because based on the codebook for the original data, the "valid skip" reported here are the ones who study in private schools.
+For the variable SCHRTSCHL, which refers to whether the student is studying in a charter school, I change all the "valid skip" reported to "no" for this variable, because based on the codebook for the original data, the "valid skip" reported here are the ones who study in private schools.
 
 ```{r SCHRTSCHL, warning= FALSE, message = FALSE}
 df$SCHRTSCHL[df$SCHRTSCHL == "-1 Valid Skip"] <- "2 No"
@@ -104,18 +132,17 @@ table(df$SCHRTSCHL)
 ```
 
 
-E8: I delete the 552 observations reported as "valid ship" for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
+For the variable SEREPEAT, which refers to refers to whether the student has repeated any grades since starting kindergarten, I delete the 552 observations reported as "valid skip" for this variable, because according to the codebook, there are 552 observations skip from the first question in the survey.
 
 ```{r SEREPEAT, warning= FALSE, message = FALSE}
 df <- df[!(df$SEREPEAT == "-1 Valid Skip"),]
-table(df$SPERFORM)
+table(df$SEREPEAT)
 ```
 
 
-The same 552 "valid skip" for every following variable are deleted.
+For the following variables, the same 552 "valid skip" for every following variable are deleted. SESUSOUT refers to  whether the student has experienced an out-of-school suspension. SESUSOUT refers to whether the student has experienced an in-school suspension (not counting detentions). SEEXPEL refers to whether the student has been expelled from school. SEFUTUREX refers to  how far do the parent expect the child to go in his/her education.
 
 ```{r other varibles, warning= FALSE, message = FALSE}
-table(df$SEREPEAT)
 table(df$SESUSOUT)
 table(df$SESUSPIN)
 table(df$SEEXPEL)
@@ -123,7 +150,7 @@ table(df$SEFUTUREX)
 ```
 
 
-E19: I create a new variable "SEDISP" based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
+I create a new variable "SEDISP" based on three original variables: SESUSOUT (out of school suspension), SESUSPIN (in school suspension) and SEEXPEL (expelled). The new variable demonstrates whether the child had ever been punished by the school discipline before s/he started to study in the current school. The variable equals to 1 (yes) if the answer for any of the three original questions is yes, 2 (no) otherwise.
 
 ```{r SEDISP, warning= FALSE, message = FALSE}
 df$SEDISP <- df$SESUSOUT
@@ -136,7 +163,7 @@ table(df$SEDISP)
 ```
 
 
-E48: The original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more.
+For HDRECSER, the original survey question for this variable is "whether this child receiving services for his/her condition". The codebook tells me that the "condition" refers to the learning disabilities and disorders asked in the earlier questions, which include: intellectual disability, speech or language impairment, serious emotional disturbance, deafness or another hearing impairment, blindness or another visual impairment not corrected with glasses, orthopedic impairment, autism, Pervasive Developmental Disorder (PDD), Attention Deficit Disorder, ADD or ADHD, specific learning disability, developmental delay, traumatic brain injury, and other health impairment lasting 6 months or more.
 
 I redefine this variable as whether this child has any learning disability. So, I change all the "yes" and "no" reported in the original question to "yes" and change all the "valid skip" to "no", because student without any disabilities or disorders do not need to answer this question.
 
@@ -147,7 +174,7 @@ table(df$HDRECSER)
 ```
 
 
-E64: I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
+For CENGLPRG, which refers to whether the student currently enrolled in English as a second language, bilingual education, or an English immersion program, I change all the "valid skip" reported to "no" for this variable, because native English speakers and children who are not able to speak do not need to answer this question.
 
 ```{r CENGLPRG, warning= FALSE, message = FALSE}
 df$CENGLPRG[df$CENGLPRG == "-1 Valid Skip"] <- "2 No"
@@ -155,7 +182,7 @@ table(df$CENGLPRG)
 ```
 
 
-E112: I create a new variable "HWELFALL" based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
+I create a new variable "HWELFALL" based on seven original variables: HWELFTAN (received TANF in the past 12 months), HWELFST (received state welfare or family assistance in the past 12 months), HWIC (received WIC in the past 12 months), HFOODST (received Food Stamps in the past 12 months), HMEDICAID (received Medicaid in the past 12 months), HCHIP (received CHIP in the past 12 months), HSECN8 (received Section 8 in the past 12 months). The new variable demonstrates whether the family ever receive benefits from any welfare plans in the past 12 months. The variable equals to 1 (yes) if the answer for any of the seven original questions is yes, 2 (no) otherwise.
 
 ```{r HWELFALL, warning= FALSE, message = FALSE}
 df$HWELFALL <- df$HWELFTAN
@@ -176,7 +203,7 @@ table(df$HWELFALL)
 ```
 
 
-Drop levels of class, there are only two class avaliable 
+Drop levels of class, there are only two class avaliable for prediction
 
 ```{r drop levles, warning= FALSE, message = FALSE}
 df <- droplevels(df)
@@ -184,9 +211,8 @@ df <- droplevels(df)
 
 
 
-# Training
-
-Split data set
+## Data Training
+First, I need to split dataset into training data and testing data.
 
 ```{r train test split, warning= FALSE, message = FALSE}
 # create a split object
@@ -197,22 +223,23 @@ charter_testing <- testing(split)
 ```
 
 
-The data is highly unbalanced which contains only 6% of positive cases
+Before training the data, there is an important fact to be noticed. Only 6% of the observations are studying in charter schools, which means the data is highly imbalanced and contains only 6% of positive cases. The imbalanced data can lead to overfitting and other problems, so I need to balance the data.
 
 ```{r display frequencies, warning= FALSE, message = FALSE}
 prop.table(table(df$SCHRTSCHL))
 ```
 
-
-Balance the data by oversampling
+To balance the data, the negative cases need to be over sampled and the positive cases need to be under sampled. By both over and under sampling, the data turn out to be balanced with about 50% of positive cases and 50% of negative cases.
 
 ```{r displa, warning= FALSE, message = FALSE}
-charter_training_balance <- ovun.sample(SCHRTSCHL~., data = charter_training, method = "both", p = 0.5， seed = 20200505)$data
+charter_training_balance <- ovun.sample(SCHRTSCHL~., data = charter_training, method = "both", p = 0.5, seed = 20200505)$data
 table(charter_training_balance$SCHRTSCHL)
 ```
 
 
-Train adaboost with k-fold, boosting.cv includes k-fold so vfold_cv is not necessary
+Because the data has been over and under sampled to keep the balance, K-fold cross validation is helpful to results in a less biased model. It ensures that every observation from the original dataset has the chance of appearing in training and test set. Also, the cross validation is a standard technique to detect overfitting, which enables me to figure out the best model. So, I train the data by using adaboost with k-fold. 
+
+When mfinal=10, the error of the model is 0.0513.
 
 ```{r mfinal=10, warning= FALSE, message = FALSE}
 # classification with adaboost
@@ -220,11 +247,15 @@ adaboost_10 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos
 adaboost_10$error
 ```
 
+When mfinal=20, the error of the model is 0.0336.
+
 ```{r mfinal=20, warning= FALSE, message = FALSE}
 # classification with adaboost
 adaboost_20 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=20, coeflearn = 'Breiman', control = rpart.control(cp=-1))
 adaboost_20$error
 ```
+
+When mfinal=30, the error of the model is 0.0303.
 
 ```{r mfinal=30, warning= FALSE, message = FALSE}
 # classification with adaboost
@@ -232,11 +263,15 @@ adaboost_30 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos
 adaboost_30$error
 ```
 
+When mfinal=40, the error of the model is 0.0297.
+
 ```{r mfinal=40, warning= FALSE, message = FALSE}
 # classification with adaboost
 adaboost_40 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=40, coeflearn = 'Breiman', control = rpart.control(cp=-1))
 adaboost_40$error
 ```
+
+When mfinal=50, the error of the model is 0.0275.
 
 ```{r mfinal=50, warning= FALSE, message = FALSE}
 # classification with adaboost
@@ -244,11 +279,15 @@ adaboost_50 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos
 adaboost_50$error
 ```
 
+When mfinal=60, the error of the model is 0.0289.
+
 ```{r mfinal=60, warning= FALSE, message = FALSE}
 # classification with adaboost
 adaboost_60 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))
 adaboost_60$error
 ```
+
+When mfinal=70, the error of the model is 0.0269.
 
 ```{r mfinal=70, warning= FALSE, message = FALSE}
 # classification with adaboost
@@ -256,34 +295,150 @@ adaboost_70 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos
 adaboost_70$error
 ```
 
+When mfinal=80, the error of the model is 0.02670.
+
 ```{r mfinal=80, warning= FALSE, message = FALSE}
 # classification with adaboost
 adaboost_80 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=80, coeflearn = 'Breiman', control = rpart.control(cp=-1))
 adaboost_80$error
 ```
 
-When mfinal is 60, the error is lowest
+From the results above, it is obvious that when mfinal is 70, the error is lowest. So, I train the model with mfinal=70.
 
 ```{r final model, warning= FALSE, message = FALSE}
-# classification with adaboost
-adaboost <- boosting(SCHRTSCHL~., data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost <- boosting(SCHRTSCHL~., data=charter_training_balance, boos=TRUE, mfinal=70, coeflearn = 'Breiman', control = rpart.control(cp=-1))
 ```
 
 
+## Prediction
+Next, I can make a prediction which include the test data. Because the test data is not involved in training process, it can evaluate the gernrealized performance of my model. 
 
-# Prediction
-
-make a prediction
-
-```{r test adaboost, warning= FALSE, message = FALSE}
-# prediction
+```{r predict, warning= FALSE, message = FALSE}
 pred <- predict(adaboost, charter_testing)
-# metric
+```
+
+The following metric give the result of model performence evaluation. To be specific, precision talks about how precise/accurate your model is out of those predicted positive, how many of them are actual positive; Recall calculates how many of the Actual Positives our model capture through labeling it as Positive; F1 is a function of Precision and Recall, which measures a balance between Precision and Recall. Although the results are not satisfactory, the model still can tell us something about school choice.
+
+```{r metrics, warning= FALSE, message = FALSE}
+y_true <- charter_testing$SCHRTSCHL
+y_pred <- as.factor(pred$class)
+
+# precision
+precision <- posPredValue(y_pred, y_true, positive="1 Yes")
+precision
+
+# recall
+recall <- sensitivity(y_pred, y_true, positive="1 Yes")
+recall
+
+# F1 score
+f1 <- (2 * precision * recall) / (precision + recall)
+f1
+
+# confusion metric
 pred$confusion
 ```
 
-Get feature importance
+Finally, I can get the feature importance of the model, which tells me how the features in the model contribute to prediction. SEFUTREX, HHTOTALXX and TTLHHINC are the three most important features, which refers to parent's expectation of their child's year of education, people live in the household, and total annual income of the household. High income families tend to have higher expectation for their children's education. Also, high income families are not likely to live with their extended family members so that the number of people live in an affluent household is likely to be small. The result indicate that there is still socioeconomic bias regarding to school choice. The charter school is more likely an option for the families with better socioeconomic conditions, but not for all the families. 
 
 ```{r feature importance, warning= FALSE, message = FALSE}
 sort(adaboost$importance)
 ```
+
+
+
+## Appendix: the original survey questions of variables
+SCHRTSCHL: Is this school a charter school? Yes/No
+
+SPERFORM: In deciding between schools, did you seek information on the performance of the schools you were considering, like test scores, dropout rates, and so on? Yes/No
+
+SEREPEAT: Since starting kindergarten, has this child repeated any grades? Yes/No
+
+SESUSOUT: Has this child ever had the following experiences? a. An out-of-school suspension Yes/No
+
+SESUSPIN: Has this child ever had the following experiences? b. An in-school suspension not counting detentions Yes/No
+
+SEEXPEL: Has this child ever had the following experiences? c. Been expelled from school Yes/No
+
+SEFUTUREX: How far do you expect this child to go in his/her education? Complete less than a high school diploma/Graduate from high school/Attend a vocational or technical school after high school/Attend two or more years of college/Earn a Bachelor's degree/Earn a graduate degree or professional degree beyond a Bachelor's
+
+FOLIBRAYX: In the past month, has anyone in your family done the following things with this child? a. Visited a library Yes/No
+
+FOBOOKSTX: In the past month, has anyone in your family done the following things with this child? b. Visited a bookstore Yes/No
+
+FOCONCRTX: In the past month, has anyone in your family done the following things with this child? c. Gone to a play, concert, or other live show Yes/No
+
+FOMUSEUMX: In the past month, has anyone in your family done the following things with this child? d. Visited an art gallery, museum, or historical site Yes/No
+
+FOZOOX: In the past month, has anyone in your family done the following things with this child? e. Visited a zoo or aquarium Yes/No
+
+FOGROUPX: In the past month, has anyone in your family done the following things with this child? f. Attended an event sponsored by a community, religious, or ethnic group Yes/No
+
+FOSPRTEVX: In the past month, has anyone in your family done the following things with this child? g. Attended an athletic or sporting event outside of school in which this child was not a player Yes/No
+
+HDHEALTH: In general, how would you describe this child's health? Excellent/Very good/Good/Fair/Pool
+
+HDRECSER: Is this child receiving services for his/her condition? Yes/No
+
+CPLCBRTH: Where was this child born? One of the 50 United States or the District of Columbia/One of the U.S. territories/Another country
+
+CHISPAN: Is this child of Hispanic, Latino, or Spanish origin? Yes/No
+
+CAMIND: What is this child's race? You may mark one or more races. a. American Indian or Alaska Native Yes/No
+
+CASIAN: What is this child's race? You may mark one or more races. b. Asian Yes/No
+
+CBLACK: What is this child's race? You may mark one or more races. c. Black or African American Yes/No
+
+CPACI: What is this child's race? You may mark one or more races. d. Native Hawaiian or other Pacific Islander Yes/No
+
+CWHITE: What is this child's race? You may mark one or more races. e. White Yes/No
+
+CHISPRM: What is this child's race? You may mark one or more races. f. race not reported Yes/No
+
+CSEX: What is this child's sex? Yes/No
+
+CENGLPRG: Is this child currently enrolled in English as a second language, bilingual education, or an English immersion program? Yes/No
+
+HHTOTALXX: How many people live in this household?
+
+HHMOM: How many of the following people live in this household with this child? c. Mother (birth, adoptive, step, or foster)
+
+HHDAD: How many of the following people live in this household with this child? d. Father (birth, adoptive, step, or foster
+
+HWELFTAN: In the past 12 months, did your family ever receive benefits from any of the following programs? Temporary Assistance for Needy Families, or TANF Yes/No
+
+HWELFST: In the past 12 months, did your family ever receive benefits from any of the following programs? Your state welfare or family assistance program Yes/No
+
+HWIC: In the past 12 months, did your family ever receive benefits from any of the following programs? Women, Infants, and Children, or WIC Yes/No
+
+HFOODST: In the past 12 months, did your family ever receive benefits from any of the following programs? Food Stamps Yes/No
+
+HMEDICAID: In the past 12 months, did your family ever receive benefits from any of the following programs? Medicaid Yes/No
+
+HCHIP: In the past 12 months, did your family ever receive benefits from any of the following programs? Child Health Insurance Program (CHIP) Yes/No
+
+HSECN8: In the past 12 months, did your family ever receive benefits from any of the following programs? Section 8 housing assistance Yes/No
+
+TTLHHINC: Which category best fits the total income of all persons in your household over the past 12 months? 0-10,000/10,001-20,000/20,001-30,000/30,001-40,000/40,001-50,000/50,001-60,000/60,001-75,000/75,001-100,000/100,001-150,000/150,001 or more
+
+OWNRNTHB: Is this house. Owned or being bough/Rented/Occupied by some other arrangement
+
+
+## References:
+[1] Robert E. Schapire. Explaining adaboost. In Empirical Inference, pages 37–52. Springer, 2013.<br>
+[2] Yoav Freund and Robert E. Schapire. Experiments with a new boosting algorithm. In ICML, volume 96, pages 148–156, 1996.<br>
+[3] Jerome Friedman, Trevor Hastie, Robert Tibshirani, et al. Additive logistic regression: a statistical view of boosting (with discussion and a rejoinder by the authors). The Annals of Statistics, 28(2):337–407, 2000.<br>
+[4] Yoav Freund and Robert E. Schapire. A decision-theoretic generalization of on-line learning and application to boosting. Journal of Computer and System Sciences, 1997(55):119-139.<br>
+[5] Michael Kearns, Leslie G.Valiant. Learning Boolean formulae or finite automata is as hard as factoring. Technical Report TR-14-88, Harvard University Aiken Computation Laboratory, 1988.<br>
+[6] Raul Rojas. AdaBoost and the Super Bowl of Classifiers A Tutorial Introduction to Adaptive Boostring, Technical Report, 2009.<br>
+[7] Li Xuchun, Lei Wang, and Eric Sung. A study of AdaBoost with SVM based weak learners. In Proceedings. 2005 IEEE International Joint Conference on Neural Networks, 2005. (Vol. 1, pp. 196-201). IEEE.<br>
+[8] Yoav Freund and Robert E. Schapire. A Short Introduction to Boosting. Journal of Japanese Society for Artificial Intelligence, 14(5):771- 780, 1999.<br>
+[9] Vapnik, V.N. and Chervonenkis, A.Y. On the uniform convergence of relative frequencies of events to their probabilities. Theory Prob. Appl. 16(2), 264–280, 1971<br>
+[10]Robert E. Schapire and Yoav Freund. Boosting: Foundations and Algorithms. MIT Press, Cambridge, 2012. <br>
+[11] Robert E. Schapire, Yoav Freund, Peter Bartlett, and Wee Sun Lee. Boosting the margin: A new explanation for the effectiveness of voting methods. Annals of statistics, 1651–1686, 1998.<br>
+[12] Robert M. Freund, Paul Grigas, and Rahul Mazumder. Adaboost and forward stagewise regression are first-order convex optimization methods. arXiv preprint arXiv:1307.1192, 2013.<br>
+[13] Leo Breiman. Prediction games and arcing algorithms. Neural computation, 11(7):1493–1517, 1999.<br>
+[14] Liwei Wang, Masashi Sugiyama, Zhaoxiang Jing, Cheng Yang, Zhi-Hua Zhou, and Jufu Feng. A refined margin analysis for boosting algorithms via equilibrium margin. The Journal of Machine Learning Research, 12:1835–1863, 2011.<br>
+[15] Lev Reyzin and Robert E. Schapire. How boosting the margin can also boost classifier complexity. In: Proceedings of the 23rd International Conference on Machine Learning:753-760, 2006.<br>
+
