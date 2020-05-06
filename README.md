@@ -1,4 +1,4 @@
-# Adaboost for Charter School
+## Adaboost for Charter School
 
 *Yingxin Zhang*
 
