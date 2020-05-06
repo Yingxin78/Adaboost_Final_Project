@@ -174,6 +174,10 @@ df$HWELFALL[(df$HSECN8 == "1 Yes")] <- "1 Yes"
 df$HSECN8 <- NULL
 table(df$HWELFALL)
 ```
+
+
+Drop levels of class, there are only two class avaliable 
+
 ```{r drop levles, warning= FALSE, message = FALSE}
 df <- droplevels(df)
 ```
@@ -200,7 +204,7 @@ prop.table(table(df$SCHRTSCHL))
 ```
 
 
-balance the data by oversampling
+Balance the data by oversampling
 
 ```{r displa, warning= FALSE, message = FALSE}
 charter_training_balance <- ovun.sample(SCHRTSCHL~., data = charter_training, method = "both", p = 0.5， seed = 20200505)$data
@@ -208,19 +212,78 @@ table(charter_training_balance$SCHRTSCHL)
 ```
 
 
-```{r train adaboost, warning= FALSE, message = FALSE}
+Train adaboost with k-fold, boosting.cv includes k-fold so vfold_cv is not necessary
+
+```{r mfinal=10, warning= FALSE, message = FALSE}
 # classification with adaboost
-adaboost = boosting(SCHRTSCHL~., data=charter_training, boos=TRUE, mfinal=50, coeflearn = 'Breiman', control = rpart.control(cp=-1))
-summary(adaboost)
+adaboost_10 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=10, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_10$error
 ```
+
+```{r mfinal=20, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_20 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=20, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_20$error
+```
+
+```{r mfinal=30, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_30 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=30, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_30$error
+```
+
+```{r mfinal=40, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_40 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=40, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_40$error
+```
+
+```{r mfinal=50, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_50 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=50, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_50$error
+```
+
+```{r mfinal=60, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_60 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_60$error
+```
+
+```{r mfinal=70, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_70 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=70, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_70$error
+```
+
+```{r mfinal=80, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost_80 <- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=80, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+adaboost_80$error
+```
+
+When mfinal is 60, the error is lowest
+
+```{r final model, warning= FALSE, message = FALSE}
+# classification with adaboost
+adaboost <- boosting(SCHRTSCHL~., data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))
+```
+
+
+
+# Prediction
+
+make a prediction
 
 ```{r test adaboost, warning= FALSE, message = FALSE}
 # prediction
-pred = predict(adaboost, charter_testing)
+pred <- predict(adaboost, charter_testing)
 # metric
-print(pred$confusion)
+pred$confusion
 ```
 
+Get feature importance
+
 ```{r feature importance, warning= FALSE, message = FALSE}
-adaboost$importance
+sort(adaboost$importance)
 ```

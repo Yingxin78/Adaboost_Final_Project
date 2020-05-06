@@ -198,6 +198,7 @@ knitr::opts_chunk$set(fig.align = &quot;center&quot;)
 
 library(tidyverse)
 library(tidymodels)
+library(ROSE)
 library(adabag)
 library(caret)
 library(knitr)
@@ -350,54 +351,128 @@ table(df$HWELFALL)</code></pre>
 <pre><code>## 
 ##    -9 Missing -1 Valid Skip         1 Yes          2 No 
 ##             0             0          3683          9840</code></pre>
+<p>Drop levels of class, there are only two class avaliable</p>
 <pre class="r"><code>df &lt;- droplevels(df)</code></pre>
 </div>
 <div id="training" class="section level1">
 <h1>Training</h1>
-<p>The data is highly unbalanced</p>
-<pre class="r"><code># Display frequencies for the categorical variables
-table(df$SCHRTSCHL)</code></pre>
-<pre><code>## 
-## 1 Yes  2 No 
-##   843 12680</code></pre>
 <p>Split data set</p>
 <pre class="r"><code># create a split object
 split &lt;- initial_split(df, prop = 0.8)
 # use the split object to create training and testing data
 charter_training &lt;- training(split)
 charter_testing &lt;- testing(split)</code></pre>
+<p>The data is highly unbalanced which contains only 6% of positive cases</p>
+<pre class="r"><code>prop.table(table(df$SCHRTSCHL))</code></pre>
+<pre><code>## 
+##      1 Yes       2 No 
+## 0.06233824 0.93766176</code></pre>
+<p>Balance the data by oversampling</p>
+<pre class="r"><code>charter_training_balance &lt;- ovun.sample(SCHRTSCHL~., data = charter_training, method = &quot;both&quot;, p = 0.5， seed = 20200505)$data
+table(charter_training_balance$SCHRTSCHL)</code></pre>
+<pre><code>## 
+##  2 No 1 Yes 
+##  5326  5493</code></pre>
+<p>Train adaboost with k-fold, boosting.cv includes k-fold so vfold_cv is not necessary</p>
 <pre class="r"><code># classification with adaboost
-adaboost = boosting(SCHRTSCHL~., data=charter_training, boos=TRUE, mfinal=50, coeflearn = 'Breiman', control = rpart.control(cp=-1))
-summary(adaboost)</code></pre>
-<pre><code>##            Length Class   Mode     
-## formula        3  formula call     
-## trees         50  -none-  list     
-## weights       50  -none-  numeric  
-## votes      21638  -none-  numeric  
-## prob       21638  -none-  numeric  
-## class      10819  -none-  character
-## importance    29  -none-  numeric  
-## terms          3  terms   call     
-## call           7  -none-  call</code></pre>
+adaboost_10 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=10, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 21:43:08 2020 
+## i:  2 Tue May 05 21:43:23 2020 
+## i:  3 Tue May 05 21:43:38 2020 
+## i:  4 Tue May 05 21:43:54 2020 
+## i:  5 Tue May 05 21:44:09 2020</code></pre>
+<pre class="r"><code>adaboost_10$error</code></pre>
+<pre><code>## [1] 0.05129864</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_20 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=20, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 21:44:35 2020 
+## i:  2 Tue May 05 21:45:01 2020 
+## i:  3 Tue May 05 21:45:29 2020 
+## i:  4 Tue May 05 21:45:56 2020 
+## i:  5 Tue May 05 21:46:23 2020</code></pre>
+<pre class="r"><code>adaboost_20$error</code></pre>
+<pre><code>## [1] 0.03364451</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_30 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=30, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 21:47:12 2020 
+## i:  2 Tue May 05 21:48:00 2020 
+## i:  3 Tue May 05 21:48:43 2020 
+## i:  4 Tue May 05 21:49:26 2020 
+## i:  5 Tue May 05 21:50:12 2020</code></pre>
+<pre class="r"><code>adaboost_30$error</code></pre>
+<pre><code>## [1] 0.03031703</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_40 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=40, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 21:51:11 2020 
+## i:  2 Tue May 05 21:52:07 2020 
+## i:  3 Tue May 05 21:52:59 2020 
+## i:  4 Tue May 05 21:53:56 2020 
+## i:  5 Tue May 05 21:54:51 2020</code></pre>
+<pre class="r"><code>adaboost_40$error</code></pre>
+<pre><code>## [1] 0.02967002</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_50 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=50, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 21:56:01 2020 
+## i:  2 Tue May 05 21:57:11 2020 
+## i:  3 Tue May 05 21:58:16 2020 
+## i:  4 Tue May 05 21:59:23 2020 
+## i:  5 Tue May 05 22:00:28 2020</code></pre>
+<pre class="r"><code>adaboost_50$error</code></pre>
+<pre><code>## [1] 0.02754414</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_60 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 22:01:48 2020 
+## i:  2 Tue May 05 22:03:05 2020 
+## i:  3 Tue May 05 22:04:23 2020 
+## i:  4 Tue May 05 22:05:43 2020 
+## i:  5 Tue May 05 22:07:01 2020</code></pre>
+<pre class="r"><code>adaboost_60$error</code></pre>
+<pre><code>## [1] 0.02893059</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_70 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=70, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 22:08:31 2020 
+## i:  2 Tue May 05 22:10:03 2020 
+## i:  3 Tue May 05 22:11:29 2020 
+## i:  4 Tue May 05 22:12:57 2020 
+## i:  5 Tue May 05 22:14:27 2020</code></pre>
+<pre class="r"><code>adaboost_70$error</code></pre>
+<pre><code>## [1] 0.02689713</code></pre>
+<pre class="r"><code># classification with adaboost
+adaboost_80 &lt;- boosting.cv(SCHRTSCHL~., v=5, data=charter_training_balance, boos=TRUE, mfinal=80, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+<pre><code>## i:  1 Tue May 05 22:16:08 2020 
+## i:  2 Tue May 05 22:17:49 2020 
+## i:  3 Tue May 05 22:19:33 2020 
+## i:  4 Tue May 05 22:21:12 2020 
+## i:  5 Tue May 05 22:22:46 2020</code></pre>
+<pre class="r"><code>adaboost_80$error</code></pre>
+<pre><code>## [1] 0.02698956</code></pre>
+<p>When mfinal is 30, the error is lowest</p>
+<pre class="r"><code># classification with adaboost
+adaboost &lt;- boosting(SCHRTSCHL~., data=charter_training_balance, boos=TRUE, mfinal=60, coeflearn = 'Breiman', control = rpart.control(cp=-1))</code></pre>
+</div>
+<div id="prediction" class="section level1">
+<h1>Prediction</h1>
+<p>make a prediction</p>
 <pre class="r"><code># prediction
-pred = predict(adaboost, charter_testing)
+pred &lt;- predict(adaboost, charter_testing)
 # metric
-print(pred$confusion)</code></pre>
+pred$confusion</code></pre>
 <pre><code>##                Observed Class
 ## Predicted Class 1 Yes 2 No
-##           1 Yes     1   27
-##           2 No    156 2520</code></pre>
-<pre class="r"><code>adaboost$importance</code></pre>
-<pre><code>##     CAMIND     CASIAN     CBLACK   CENGLPRG    CHISPAN    CHISPRM      CPACI 
-##  0.8313033  1.3807393  1.7251099  0.7777910  2.4877305  0.8898063  0.2173299 
-##   CPLCBRTH       CSEX     CWHITE  FOBOOKSTX  FOCONCRTX   FOGROUPX  FOLIBRAYX 
-##  1.6560018  4.3133335  2.1857632  3.6336835  3.5302660  4.1866863  3.7534570 
-##  FOMUSEUMX  FOSPRTEVX     FOZOOX   HDHEALTH   HDRECSER      HHDAD      HHMOM 
-##  3.1574549  3.9089527  2.6749433  6.5620043  2.7697793  2.5905643  1.5804057 
-##  HHTOTALXX   HWELFALL   OWNRNTHB     SEDISP  SEFUTUREX   SEREPEAT   SPERFORM 
-## 10.3047221  2.0898161  3.3832075  1.5460184  9.1804527  1.2895140  4.2886619 
+##           1 Yes    21  167
+##           2 No    136 2380</code></pre>
+<p>Get feature importance</p>
+<pre class="r"><code>sort(adaboost$importance)</code></pre>
+<pre><code>##      CPACI    CHISPRM     CAMIND   CENGLPRG   SEREPEAT   CPLCBRTH     SEDISP 
+##  0.2460189  0.6769021  0.7634116  0.9698083  1.3343497  1.5035431  1.5091619 
+##     CASIAN      HHMOM     CBLACK     CWHITE   HWELFALL      HHDAD    CHISPAN 
+##  1.5311051  1.7718239  1.8472966  1.9312716  1.9413269  2.1758516  2.5070149 
+##   HDRECSER     FOZOOX   OWNRNTHB  FOBOOKSTX  FOMUSEUMX  FOSPRTEVX  FOLIBRAYX 
+##  2.7147669  2.8417493  3.1213452  3.2516443  3.2575433  3.6110185  3.6878344 
+##   FOGROUPX  FOCONCRTX       CSEX   SPERFORM   HDHEALTH  SEFUTUREX  HHTOTALXX 
+##  3.7289515  3.8296315  3.9641753  4.6289304  6.8467855  9.6690741 10.8738617 
 ##   TTLHHINC 
-## 13.1045016</code></pre>
+## 13.2638016</code></pre>
 </div>
 
 
